@@ -4,12 +4,10 @@ import os
 import pickle
 from time import sleep
 
-API_KEY = "SUA_API_KEY_AQUI"
+API_KEY = "7302c45066156f82c4de35011d2ad782"
 BASE_URL = "https://api.themoviedb.org/3"
 
-# -------------------------
-# SUBGÊNEROS DEFINIDOS
-# -------------------------
+
 SUBGENEROS = {
     "slasher": ["slasher", "serial killer", "knife", "stalker"],
     "found_footage": ["found footage"],
@@ -18,9 +16,7 @@ SUBGENEROS = {
     "psicologico": ["psychological horror", "psychological thriller"]
 }
 
-# -------------------------
-# CACHE
-# -------------------------
+
 CACHE_FILE = "cache_filmes.pkl"
 
 def salvar_cache(data):
@@ -33,9 +29,7 @@ def carregar_cache():
             return pickle.load(f)
     return None
 
-# -------------------------
-# COLETA DE FILMES DE TERROR
-# -------------------------
+
 def coletar_filmes_terror(paginas=5):
     filmes = []
     
@@ -53,17 +47,13 @@ def coletar_filmes_terror(paginas=5):
 
     return filmes
 
-# -------------------------
-# PEGAR KEYWORDS DO FILME
-# -------------------------
+
 def pegar_keywords(movie_id):
     url = f"{BASE_URL}/movie/{movie_id}/keywords?api_key={API_KEY}"
     r = requests.get(url).json()
     return [k["name"].lower() for k in r.get("keywords", [])]
 
-# -------------------------
-# FILTRAR TOP 10 POR SUBGÊNERO
-# -------------------------
+
 def top10_por_subgenero(filmes):
     resultados = {}
 
@@ -75,18 +65,14 @@ def top10_por_subgenero(filmes):
             if any(p in keywords for p in palavras):
                 filtrados.append(f)
 
-        # ordenar por popularidade
         filtrados = sorted(filtrados, key=lambda x: x["popularity"], reverse=True)
 
         resultados[subgenero] = filtrados[:10]  # TOP 10
 
     return resultados
 
-# -------------------------
-# PROGRAMA PRINCIPAL
-# -------------------------
+
 def main():
-    # tentar carregar cache
     cache = carregar_cache()
     if cache:
         print("📦 Cache carregado!")
@@ -95,7 +81,6 @@ def main():
         print("⏳ Coletando filmes...")
         filmes = coletar_filmes_terror()
 
-        # adicionar keywords para cada filme
         print("🔍 Coletando keywords...")
         for f in filmes:
             f["keywords"] = pegar_keywords(f["id"])
@@ -108,7 +93,6 @@ def main():
     print("🏆 Gerando Top 10 por subgênero...")
     top10 = top10_por_subgenero(dados)
 
-    # salvar CSV para o dashboard
     linhas = []
     for sub, filmes in top10.items():
         for f in filmes:
