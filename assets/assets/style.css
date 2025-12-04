@@ -1,12 +1,70 @@
+/* =============================== */
+/* VISUAL GERAL – PALETA VERMELHA */
+/* =============================== */
+
 body {
-    background-color: #000000 !important;
+    background-color: #1d1d1d; /* fundo escuro elegante */
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #c0ad6e; /* texto claro */
 }
 
-h1, h2, h3, label {
-    color: #fff !important;
-}
-
-.card {
+/* Título principal */
+h1 {
     text-align: center;
-    font-weight: bold;
+    color: #d10f0f; /* título Dashboard — Terror ao Longo das Décadas vermelho sangue */
+    margin-top: 25px;
+    margin-bottom: 35px;
+    font-size: 42px;
+    font-weight: 700;
+}
+
+/* Títulos de seção */
+h2 {
+    color: #d10f0f;  /*título Filtros*/
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 26px;
+    border-left: 5px solid #d10f0f;
+    padding-left: 12px;
+}
+
+/* Cards */
+.card {
+    background-color: #222222;
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 8px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+}
+
+/* Dropdowns e inputs */
+.Select-control, .Select-placeholder, .Select-value-label {
+    background-color: #333 !important;
+    color: #f1faee !important; 
+    border-color: #e63946 !important;
+}
+
+/* Gráficos */
+.graph-container {
+    background-color: #222;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0px 0px 8px rgba(0,0,0,0.4);
+}
+
+/* Botões */
+button, .dash-button {
+    background-color: #e63946 !important;
+    border: none !important;
+    color: #fff !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+    font-size: 16px !important;
+    transition: 0.2s;
+}
+
+button:hover, .dash-button:hover {
+    background-color: #b32b36 !important;
 }
