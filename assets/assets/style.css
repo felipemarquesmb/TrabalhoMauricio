@@ -1,0 +1,12 @@
+body {
+    background-color: #000000 !important;
+}
+
+h1, h2, h3, label {
+    color: #fff !important;
+}
+
+.card {
+    text-align: center;
+    font-weight: bold;
+}
