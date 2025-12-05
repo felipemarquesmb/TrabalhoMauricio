@@ -1,47 +1,63 @@
+# PANDAS: leitura e manipulação de dados
+# PLOTLY: visualizações interativas
+# PLOTLY.IO: personalização de temas
+# DASH: framework web para dashboards interativos
+# DCC: componentes interativos do Dash (dropdown, sliders, gráficos)
+
+
+
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 from dash import Dash, dcc, html, Input, Output, State
 
-# ======================================================
 #  TEMA VERMELHO PERSONALIZADO
-# ======================================================
+
 pio.templates["vermelho_tema"] = pio.templates["plotly_dark"]
+
+
+# TEXTO E PALETA PADRÃO DOS GRÁFICOS
+
 pio.templates["vermelho_tema"].layout.update(
     paper_bgcolor="#1a1a1a",
     plot_bgcolor="#1a1a1a",
     font=dict(color="#ffffff"),
     colorway=[
-        "#e63946",  # vermelho principal
-        "#a8dadc",  # azul claro
-        "#f1faee",  # branco gelo
-        "#457b9d",  # azul médio
-        "#1d3557",  # azul escuro
+        "#e63946",  
+        "#a8dadc",  
+        "#f1faee",  
+        "#457b9d",  
+        "#1d3557",  
     ],
 )
+# DEFINIR TEMA PADRÃO
+
 pio.templates.default = "vermelho_tema"
 
-# ======================================================
-#  CARREGAR DADOS
-# ======================================================
+
+#  CARREGAMENTO DOS ARQUIVOS CSV
+
+# Carrega dados de terror por década
 df_dec = pd.read_csv("terror_decadas.csv")
+
+# Cria coluna apenas com o ano
 df_dec["ano"] = df_dec["release_date"].str[:4]
 
+
+# Carrega dados de subgêneros (top 10 por popularidade)
 df_sub = pd.read_csv("top10_subgeneros.csv")
 
-# ======================================================
-#  INICIALIZA APP
-# ======================================================
-app = Dash(__name__)
 
-# ======================================================
-#  LAYOUT COM NAVEGAÇÃO ENTRE PÁGINAS
-# ======================================================
+# INICIALIZAÇÃO DO APP DASH
+
+app = Dash(__name__)  # CRIA APP PRINCIPAL
+
+#  LAYOUT PRINCIPAL (estrutura da página)
+
 app.layout = html.Div(
     style={"padding": "0px", "fontFamily": "Arial"},
     children=[
 
-        # ---------- NAVBAR ----------
         html.Div(
             style={
                 "backgroundColor": "#e63946",
@@ -67,14 +83,12 @@ app.layout = html.Div(
             ],
         ),
 
-        # Onde as páginas serão carregadas
         html.Div(id="pagina-conteudo", style={"padding": "20px"}),
     ],
 )
 
-# ======================================================
-#  PÁGINA DAS DÉCADAS
-# ======================================================
+#  PÁGINA 1 - ANÁLISE POR DÉCADAS
+
 def pagina_decadas():
 
     return html.Div(
@@ -82,7 +96,8 @@ def pagina_decadas():
 
             html.H2("Terror ao Longo das Décadas 🎥🩸", style={"color": "#e63946"}),
 
-            # ---------- FILTROS ----------
+            # FILTROS 
+
             html.Div(
                 style={
                     "display": "flex",
@@ -132,7 +147,7 @@ def pagina_decadas():
 
             html.Br(),
 
-            # ---------- GRÁFICOS ----------
+            # GRÁFICOS 
             dcc.Graph(id="graf-barra"),
             dcc.Graph(id="graf-linha"),
             dcc.Graph(id="graf-box"),
@@ -140,9 +155,8 @@ def pagina_decadas():
     )
 
 
-# ======================================================
-#  PÁGINA DOS SUBGÊNEROS
-# ======================================================
+#  PÁGINA 2 - SUBGÊNEROS (TOP 10)
+
 def pagina_subgeneros():
 
     fig = px.bar(
@@ -152,6 +166,8 @@ def pagina_subgeneros():
         color="subgenero",
         title="Top 10 – Filmes Mais Populares por Subgênero de Terror",
     )
+
+    # rotaciona os nomes dos filmes para não ficarem sobrepostos
 
     fig.update_layout(xaxis_tickangle=-45)
 
@@ -164,9 +180,8 @@ def pagina_subgeneros():
     )
 
 
-# ======================================================
-#  CALLBACK PARA TROCAR A PÁGINA
-# ======================================================
+#  CALLBACK PARA TROCAR A PÁGINA -> DA PÁGINA 1 PARA A 2
+
 @app.callback(
     Output("pagina-conteudo", "children"),
     Input("btn-decadas", "n_clicks"),
@@ -180,9 +195,9 @@ def mudar_pagina(btn_dec, btn_sub):
     return pagina_decadas()
 
 
-# ======================================================
-#  CALLBACK DOS GRÁFICOS DO DASHBOARD 1
-# ======================================================
+#  CALLBACK DO DASHBOARD (ATUALIZA GRÁFICOS DINAMICAMENTE)
+# Sempre que o filtro de década ou de nota mudar, os três gráficos são atualizados automaticamente.
+
 @app.callback(
     Output("graf-barra", "figure"),
     Output("graf-linha", "figure"),
@@ -192,14 +207,17 @@ def mudar_pagina(btn_dec, btn_sub):
 )
 def atualizar_graficos(decada, nota_min):
 
+    # CÓPIA DO DATAFRAME ORIGINAL
     df_filtro = df_dec.copy()
 
+    # FILTRA PELA DÉCADA, SE SELECIONADA
     if decada:
         df_filtro = df_filtro[df_filtro["decada"] == decada]
 
+    # FILTRA PELA NOTA MÍNIMA
     df_filtro = df_filtro[df_filtro["vote_average"] >= nota_min]
 
-    # --- Gráfico 1: Barras ---
+    # GRÁFICO 1: BARRAS (quantidade de filmes por década)
     contagem = df_filtro["decada"].value_counts().sort_index().reset_index()
     contagem.columns = ["decada", "qtd"]
 
@@ -211,7 +229,7 @@ def atualizar_graficos(decada, nota_min):
         text="qtd",
     )
 
-    # --- Gráfico 2: Linha ---
+    # GRÁFICO 2: LINHA (nota média por década)
     medias = df_filtro.groupby("decada")["vote_average"].mean().reset_index()
     fig_linha = px.line(
         medias,
@@ -221,7 +239,7 @@ def atualizar_graficos(decada, nota_min):
         title="Nota Média por Década",
     )
 
-    # --- Gráfico 3: Boxplot ---
+    #  GRÁFICO 3: BOXPLOT (distribuição das notas por década)
     fig_box = px.box(
         df_filtro,
         x="decada",
@@ -233,8 +251,6 @@ def atualizar_graficos(decada, nota_min):
     return fig_barra, fig_linha, fig_box
 
 
-# ======================================================
-#  RUN
-# ======================================================
+
 if __name__ == "__main__":
     app.run(debug=True)

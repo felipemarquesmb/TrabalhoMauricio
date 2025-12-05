@@ -1,12 +1,15 @@
-import requests
-import pandas as pd
-import os
-import pickle
-from time import sleep
+import requests          # fazer requisições HTTP (TMDB)
+import pandas as pd      # montar DataFrame e salvar CSV
+import os                # verificar se o arquivo de cache existe
+import pickle            # salvar/ler cache de forma eficiente
+from time import sleep   # controlar pausas para evitar bloqueio da API
+
+#  CONFIGURAÇÕES DA API TMDB
 
 API_KEY = "7302c45066156f82c4de35011d2ad782"
 BASE_URL = "https://api.themoviedb.org/3"
 
+#   Cada subgênero tem uma lista de palavras associadas
 SUBGENEROS = {
     "slasher": ["slasher", "serial killer", "knife", "stalker"],
     "found_footage": ["found footage"],
@@ -14,6 +17,8 @@ SUBGENEROS = {
     "paranormal": ["ghost", "demon", "haunted house"],
     "psicologico": ["psychological horror", "psychological thriller"]
 }
+
+#  ARQUIVO DE CACHE PARA NÃO BAIXAR TUDO NOVAMENTE
 
 CACHE_FILE = "cache_filmes.pkl"
 
@@ -34,6 +39,8 @@ def carregar_cache():
             return None
     return None
 
+#  FUNÇÃO: requisição segura
+#  Evita falhas de timeout e SSL realizando duas tentativas.
 
 def seguro_request(url):
     """Evita erros de SSL e timeout."""
@@ -50,6 +57,9 @@ def seguro_request(url):
             print("Falhou de novo — pulando...")
             return {}
 
+
+#  FUNÇÃO: coletar filmes de terror mais populares
+# Aqui coleta apenas AS PRIMEIRAS PÁGINAS do TMDB. A ideia é pegar filmes populares, não todos.
 
 def coletar_filmes_terror(paginas=5):
     filmes = []
@@ -69,12 +79,15 @@ def coletar_filmes_terror(paginas=5):
 
     return filmes
 
+#  FUNÇÃO: pegar keywords de um filme específico
 
 def pegar_keywords(movie_id):
     url = f"{BASE_URL}/movie/{movie_id}/keywords?api_key={API_KEY}"
     dados = seguro_request(url)
     return [k["name"].lower() for k in dados.get("keywords", [])]
 
+
+#  FUNÇÃO: gerar top 10 para cada subgênero
 
 def top10_por_subgenero(filmes):
     resultados = {}
